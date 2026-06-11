@@ -233,30 +233,30 @@
 </head>
 <body>
 
-  <h1>UK Phonetic Lookup</h1>
-  <p class="subtitle">For narrators &amp; voice actors — Received Pronunciation</p>
+  <h1>How Do I Say That?</h1>
+  <p class="subtitle">Pronunciation guide for the narration of Tabitha Potts</p>
 
   <div class="search-box">
-    <input type="text" id="wordInput" placeholder="Enter a word or name…" autocomplete="off" />
+    <input type="text" id="wordInput" placeholder="Type a word or character name…" autocomplete="off" />
     <button id="lookupBtn" onclick="lookup()">Look up</button>
   </div>
 
   <div id="result"></div>
   <div id="historySection" class="history" style="display:none">
-    <h2>Previous lookups</h2>
+    <h2>Recently looked up</h2>
     <div id="historyList"></div>
   </div>
 
   <div style="width:100%;max-width:520px;margin-top:40px;border-top:1px solid #e8e4dc;padding-top:28px">
-    <h2 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:#aaa;font-weight:normal;margin-bottom:16px">How to use this tool</h2>
+    <h2 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:#aaa;font-weight:normal;margin-bottom:16px">How to use this guide</h2>
     <div style="font-size:0.9rem;color:#666;line-height:1.8;font-style:italic">
-      <p style="margin-bottom:12px">Type any word or name into the box and press <em>Look up</em>. You'll see:</p>
+      <p style="margin-bottom:12px">Type any word or character name and press <em>Look up</em>. You'll get:</p>
       <ul style="padding-left:1.2em;margin-bottom:16px">
-        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">The IPA spelling</strong> — the standard phonetic alphabet used by linguists and voice coaches, e.g. <span style="font-family:'Lucida Sans Unicode',sans-serif">/ˈlɑː.ɹə/</span></li>
-        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A plain-English guide</strong> — a simple breakdown like <em>LAH-ruh</em>, where capital letters show the stressed syllable</li>
-        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A play button</strong> — click <em>Play</em> to hear the word spoken in British English straight away</li>
+        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">The IPA spelling</strong> — the standard phonetic notation used by voice coaches, e.g. <span style="font-family:'Lucida Sans Unicode',sans-serif">/ˈlɑː.ɹə/</span></li>
+        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A plain-English breakdown</strong> — e.g. <em>LAH-ruh</em>, where capital letters show which syllable to stress</li>
+        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A play button</strong> — hear the word spoken in British English straight away</li>
       </ul>
-      <p style="margin-bottom:12px"><strong style="font-style:normal;color:#444">Where pronunciations come from:</strong> The tool searches the Free Dictionary API and Wiktionary, both of which use carefully checked Received Pronunciation (RP) entries. If a word isn't found, it offers direct links to Cambridge Dictionary, howjsay.com, and Forvo — all of which have British English recordings.</p>
+      <p style="margin-bottom:12px">All pronunciations are British English (Received Pronunciation). If a name isn't found automatically, use the links provided to hear it on an external site.</p>
     </div>
   </div>
 
@@ -412,24 +412,18 @@
       const enc = encodeURIComponent(word);
       const encLower = encodeURIComponent(word.toLowerCase());
       const html = `<div class="error-card">
-        <p><strong>"${escHtml(word)}"</strong> wasn't found in the dictionary.
-        Check these UK pronunciation sources:</p>
+        <p><strong>"${escHtml(word)}"</strong> isn't in the pronunciation database — this is common for character names. Try one of these:</p>
         <ul style="margin:14px 0 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
           <li><a href="https://howjsay.com/how-to-pronounce-${encLower}"
                  target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
-            🔊 howjsay.com — British English audio ↗</a></li>
+            🔊 Hear it on howjsay.com (British English) ↗</a></li>
           <li><a href="https://dictionary.cambridge.org/dictionary/english/${encLower}"
                  target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
-            📖 Cambridge Dictionary — UK IPA ↗</a></li>
+            📖 Look it up in Cambridge Dictionary ↗</a></li>
           <li><a href="https://forvo.com/search/${enc}/en/"
                  target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
-            🎙 Forvo — filter by British speakers ↗</a></li>
+            🎙 Hear it on Forvo (select a British speaker) ↗</a></li>
         </ul>
-        <div class="manual-section" style="margin-top:18px">
-          <label>Write your own phonetic guide for the actor:</label>
-          <input type="text" id="manualPhon" placeholder="e.g.  LAR-uh  or  /ˈlɑːrə/" />
-          <p class="hint">Put stressed syllables in CAPITALS. Separate syllables with a hyphen.</p>
-        </div>
       </div>`;
       document.getElementById('result').innerHTML = html;
     }
