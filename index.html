@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UK Phonetic Lookup</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f8f6f2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      color: #1a1a1a;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 32px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      font-family: Georgia, serif;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus { border-color: #7a6a9e; }
+
+    button {
+      padding: 14px 22px;
+      background: #7a6a9e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: #5e5082; }
+    button:disabled { background: #b0a8c2; cursor: default; }
+
+    #result {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin-bottom: 16px;
+    }
+
+    .word-heading {
+      font-size: 1.5rem;
+      font-style: italic;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 12px;
+    }
+
+    .phonetic-row {
+      margin-bottom: 16px;
+    }
+
+    .phonetic-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .phonetic-value {
+      font-size: 1.25rem;
+      color: #2c2c2c;
+    }
+
+    .ipa { font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif; }
+
+    .respelling {
+      font-family: Georgia, serif;
+      letter-spacing: 0.03em;
+    }
+
+    .stressed { font-weight: bold; }
+
+    .meaning {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+      color: #666;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .error-card {
+      background: #fff8f3;
+      border: 1.5px solid #e8c9a8;
+      border-radius: 8px;
+      padding: 24px 28px;
+    }
+
+    .error-card p { font-size: 0.95rem; color: #7a5a3a; line-height: 1.6; }
+    .error-card strong { color: #5a3a1a; }
+
+    .manual-section {
+      margin-top: 16px;
+    }
+
+    .manual-section label {
+      display: block;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .manual-section input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border: 1.5px solid #ddd;
+      border-radius: 5px;
+      font-family: Georgia, serif;
+      background: #fff;
+    }
+
+    .manual-section .hint {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .history {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 8px;
+    }
+
+    .history h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #aaa;
+      margin-bottom: 10px;
+      font-weight: normal;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid #ece9e3;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .history-item:hover { background: #f5f3ef; }
+
+    .history-word { font-size: 0.95rem; font-style: italic; }
+
+    .history-phonetic {
+      font-size: 0.85rem;
+      color: #888;
+      font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif;
+    }
+
+    .copy-btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      color: #888;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+
+    .copy-btn:hover { border-color: #7a6a9e; color: #7a6a9e; background: none; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid #ddd;
+      border-top-color: #7a6a9e;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <h1>UK Phonetic Lookup</h1>
+  <p class="subtitle">For narrators &amp; voice actors — Received Pronunciation</p>
+
+  <div class="search-box">
+    <input type="text" id="wordInput" placeholder="Enter a word or name…" autocomplete="off" />
+    <button id="lookupBtn" onclick="lookup()">Look up</button>
+  </div>
+
+  <div id="result"></div>
+  <div id="historySection" class="history" style="display:none">
+    <h2>Previous lookups</h2>
+    <div id="historyList"></div>
+  </div>
+
+  <script>
+    const history = [];
+
+    document.getElementById('wordInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') lookup();
+    });
+
+    async function lookup() {
+      const input = document.getElementById('wordInput');
+      const word = input.value.trim();
+      if (!word) return;
+
+      const btn = document.getElementById('lookupBtn');
+      btn.disabled = true;
+      btn.textContent = 'Looking up…';
+
+      document.getElementById('result').innerHTML =
+        `<div class="card"><span class="spinner"></span> Fetching pronunciation…</div>`;
+
+      // 1. Try standard dictionary (good for common words)
+      try {
+        const res = await fetch(
+          `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.toLowerCase())}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          renderFound(word, data);
+          btn.disabled = false;
+          btn.textContent = 'Look up';
+          return;
+        }
+      } catch (e) { /* fall through */ }
+
+      // 2. Try Wiktionary — CORS-friendly, has RP IPA for many names
+      document.getElementById('result').innerHTML =
+        `<div class="card"><span class="spinner"></span> Checking Wiktionary…</div>`;
+      try {
+        const res = await fetch(
+          `https://en.wiktionary.org/w/api.php?action=parse&page=${encodeURIComponent(word)}&prop=wikitext&format=json&origin=*`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const wikitext = data?.parse?.wikitext?.['*'] || '';
+          const ipa = extractWiktionaryRP(wikitext);
+          if (ipa) {
+            const audioFile = extractWiktionaryAudioFile(wikitext);
+            const audioUrl = audioFile ? await resolveWikimediaAudio(audioFile) : null;
+            renderFound(word, [{ word, phonetics: [{ text: ipa, audio: audioUrl || '' }], meanings: [] }], 'Wiktionary (RP)');
+            btn.disabled = false;
+            btn.textContent = 'Look up';
+            return;
+          }
+        }
+      } catch (e) { /* fall through */ }
+
+      renderNotFound(word);
+      btn.disabled = false;
+      btn.textContent = 'Look up';
+    }
+
+    function extractWiktionaryRP(wikitext) {
+      // Prefer RP-tagged IPA: {{IPA|en|/ˈlɑː.ɹə/|a=RP}}
+      let m = wikitext.match(/IPA\|en\|([^|}\s]+)\|a=RP/);
+      if (m) return m[1].replace(/['"]/g, '');
+      // Fall back to any English IPA
+      m = wikitext.match(/IPA\|en\|([^|}\s]+)/);
+      if (m) return m[1].replace(/['"]/g, '');
+      return null;
+    }
+
+    function extractWiktionaryAudioFile(wikitext) {
+      // {{audio|en|LL-Q1860 (eng)-Vealhurl-Lara.wav|a=Southern England}}
+      const m = wikitext.match(/\{\{audio\|en\|([^|}\n]+\.(?:wav|mp3|ogg))/i);
+      return m ? m[1].trim() : null;
+    }
+
+    async function resolveWikimediaAudio(filename) {
+      try {
+        const url = `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${encodeURIComponent(filename)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const pages = data?.query?.pages || {};
+        const page = Object.values(pages)[0];
+        return page?.imageinfo?.[0]?.url || null;
+      } catch { return null; }
+    }
+
+
+    function renderFound(word, data, source) {
+      const entry = data[0];
+
+      // Prefer UK phonetics — the API sometimes tags them
+      let ipaObj = entry.phonetics.find(p =>
+        p.text && (p.audio || '').includes('-uk')
+      );
+      if (!ipaObj) ipaObj = entry.phonetics.find(p => p.text);
+      const ipa = ipaObj ? ipaObj.text : null;
+
+      const respelling = ipa ? ipaToRespelling(ipa) : null;
+
+      // Grab first definition for context
+      const def = entry.meanings?.[0]?.definitions?.[0]?.definition || '';
+      const ipaLabel = source || 'IPA (UK)';
+
+      let html = `<div class="card">
+        <div class="word-heading">${escHtml(entry.word)}</div>`;
+
+      if (ipa) {
+        html += `<div class="phonetic-row">
+          <div class="phonetic-label">${escHtml(ipaLabel)}</div>
+          <div class="phonetic-value ipa">${escHtml(ipa)}</div>
+        </div>`;
+      }
+
+      if (respelling) {
+        html += `<div class="phonetic-row">
+          <div class="phonetic-label">Say it like</div>
+          <div class="phonetic-value respelling">${respelling}</div>
+        </div>`;
+      }
+
+      if (!ipa) {
+        html += `<p style="color:#aaa;font-size:.9rem">No phonetic data returned for this word.</p>`;
+      }
+
+      if (def) {
+        html += `<div class="meaning">${escHtml(def)}</div>`;
+      }
+
+      const copyText = [ipa, respelling].filter(Boolean).join('  |  ');
+      // Prefer a direct audio file URL; fall back to Forvo page
+      const directAudio = entry.phonetics.find(p => p.audio)?.audio || null;
+      const forvoUrl = `https://forvo.com/word/${encodeURIComponent(entry.word.toLowerCase())}/#en`;
+      const audioLink = directAudio || forvoUrl;
+      const audioLabel = directAudio ? 'Copy audio file link' : 'Copy Forvo link';
+      const audioNote = directAudio
+        ? '<span style="font-size:0.75rem;color:#aaa;align-self:center">Direct .mp3 — paste into Word as hyperlink</span>'
+        : '<span style="font-size:0.75rem;color:#aaa;align-self:center">Forvo page — filter to British speakers</span>';
+
+      html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="copy-btn" onclick="copyText('${escAttr(copyText)}', this)">Copy phonetic</button>
+        <button class="copy-btn" onclick="copyText('${escAttr(audioLink)}', this)">${escHtml(audioLabel)}</button>
+        ${audioNote}
+      </div>`;
+
+      html += `</div>`;
+      document.getElementById('result').innerHTML = html;
+
+      addHistory(word, ipa);
+    }
+
+    function renderNotFound(word) {
+      const enc = encodeURIComponent(word);
+      const encLower = encodeURIComponent(word.toLowerCase());
+      const html = `<div class="error-card">
+        <p><strong>"${escHtml(word)}"</strong> wasn't found in the dictionary.
+        Check these UK pronunciation sources:</p>
+        <ul style="margin:14px 0 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+          <li><a href="https://howjsay.com/how-to-pronounce-${encLower}"
+                 target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
+            🔊 howjsay.com — British English audio ↗</a></li>
+          <li><a href="https://dictionary.cambridge.org/dictionary/english/${encLower}"
+                 target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
+            📖 Cambridge Dictionary — UK IPA ↗</a></li>
+          <li><a href="https://forvo.com/search/${enc}/en/"
+                 target="_blank" style="color:#7a6a9e;text-decoration:none;font-size:0.95rem">
+            🎙 Forvo — filter by British speakers ↗</a></li>
+        </ul>
+        <div class="manual-section" style="margin-top:18px">
+          <label>Write your own phonetic guide for the actor:</label>
+          <input type="text" id="manualPhon" placeholder="e.g.  LAR-uh  or  /ˈlɑːrə/" />
+          <p class="hint">Put stressed syllables in CAPITALS. Separate syllables with a hyphen.</p>
+        </div>
+      </div>`;
+      document.getElementById('result').innerHTML = html;
+    }
+
+    function addHistory(word, ipa) {
+      if (history.find(h => h.word.toLowerCase() === word.toLowerCase())) return;
+      history.unshift({ word, ipa });
+      if (history.length > 20) history.pop();
+
+      const section = document.getElementById('historySection');
+      const list = document.getElementById('historyList');
+      section.style.display = 'block';
+
+      list.innerHTML = history.map(h => `
+        <div class="history-item" onclick="document.getElementById('wordInput').value='${escAttr(h.word)}';lookup()">
+          <span class="history-word">${escHtml(h.word)}</span>
+          <span class="history-phonetic">${escHtml(h.ipa || '')}</span>
+        </div>
+      `).join('');
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+    }
+
+    // ── IPA → plain-English respelling ─────────────────────────────────────
+    // Covers common British English RP phonemes.
+    function ipaToRespelling(ipa) {
+      // Strip surrounding slashes/brackets
+      let s = ipa.replace(/^[\/\[\]]+|[\/\[\]]+$/g, '').trim();
+
+      // Vowels & diphthongs (order matters — longer patterns first)
+      const map = [
+        [/eɪ/g,  'AY'],
+        [/aɪ/g,  'EYE'],
+        [/ɔɪ/g,  'OY'],
+        [/aʊ/g,  'OW'],
+        [/əʊ/g,  'OH'],
+        [/ɪə/g,  'EER'],
+        [/eə/g,  'AIR'],
+        [/ʊə/g,  'OOR'],
+        [/uː/g,  'OO'],
+        [/ɔː/g,  'OR'],
+        [/ɑː/g,  'AH'],
+        [/iː/g,  'EE'],
+        [/ɜː/g,  'UR'],
+        [/ɪ/g,   'ih'],
+        [/ʊ/g,   'uu'],
+        // ʌ and u must come before ə→uh, so the 'u' in 'uh' isn't re-caught
+        [/ʌ/g,   'u'],
+        [/u/g,   'oo'],
+        [/ə/g,   'uh'],
+        [/æ/g,   'a'],
+        [/ɒ/g,   'o'],
+        [/e/g,   'e'],
+        [/i/g,   'ee'],
+        // Consonants
+        [/ɹ/g,   'r'],   // IPA 'r' (used in Wiktionary RP transcriptions)
+        [/ŋ/g,   'ng'],
+        [/ʃ/g,   'sh'],
+        [/ʒ/g,   'zh'],
+        [/tʃ/g,  'ch'],
+        [/dʒ/g,  'j'],
+        [/θ/g,   'th'],
+        [/ð/g,   'dh'],
+        [/j/g,   'y'],
+        [/x/g,   'kh'],
+        // Syllable separators
+        [/\./g,  '-'],   // Wiktionary uses dots between syllables
+        [/ˌ/g,   '-'],
+        [/ˈ/g,   '·'],  // primary stress marker — capitalised below
+      ];
+
+      map.forEach(([pat, rep]) => { s = s.replace(pat, rep); });
+
+      // Capitalise the stressed syllable (everything after · up to next separator)
+      s = s.replace(/·([^·\-\s]+)/g, (_, syl) => syl.toUpperCase());
+      s = s.replace(/·/g, '');
+
+      // Clean up remaining IPA chars we haven't mapped
+      s = s.replace(/[ʔ:ː˘˺͡]/g, '');
+
+      // Tidy separators
+      s = s.replace(/-{2,}/g, '-').replace(/^-|-$/g, '');
+
+      return s || null;
+    }
+
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escAttr(s) {
+      return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
