@@ -254,7 +254,7 @@
       <ul style="padding-left:1.2em;margin-bottom:16px">
         <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">The IPA spelling</strong> — the standard phonetic alphabet used by linguists and voice coaches, e.g. <span style="font-family:'Lucida Sans Unicode',sans-serif">/ˈlɑː.ɹə/</span></li>
         <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A plain-English guide</strong> — a simple breakdown like <em>LAH-ruh</em>, where capital letters show the stressed syllable</li>
-        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">An audio link</strong> — click <em>Copy audio file link</em> to get a link you can play to hear the word spoken in British English</li>
+        <li style="margin-bottom:6px"><strong style="font-style:normal;color:#444">A play button</strong> — click <em>Play</em> to hear the word spoken in British English straight away</li>
       </ul>
       <p style="margin-bottom:12px"><strong style="font-style:normal;color:#444">Where pronunciations come from:</strong> The tool searches the Free Dictionary API and Wiktionary, both of which use carefully checked Received Pronunciation (RP) entries. If a word isn't found, it offers direct links to Cambridge Dictionary, howjsay.com, and Forvo — all of which have British English recordings.</p>
     </div>
@@ -394,16 +394,12 @@
       // Prefer a direct audio file URL; fall back to Forvo page
       const directAudio = entry.phonetics.find(p => p.audio)?.audio || null;
       const forvoUrl = `https://forvo.com/word/${encodeURIComponent(entry.word.toLowerCase())}/#en`;
-      const audioLink = directAudio || forvoUrl;
-      const audioLabel = directAudio ? 'Copy audio file link' : 'Copy Forvo link';
-      const audioNote = directAudio
-        ? '<span style="font-size:0.75rem;color:#aaa;align-self:center">Direct .mp3 — paste into Word as hyperlink</span>'
-        : '<span style="font-size:0.75rem;color:#aaa;align-self:center">Forvo page — filter to British speakers</span>';
-
       html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="copy-btn" onclick="copyText('${escAttr(copyText)}', this)">Copy phonetic</button>
-        <button class="copy-btn" onclick="copyText('${escAttr(audioLink)}', this)">${escHtml(audioLabel)}</button>
-        ${audioNote}
+        ${directAudio
+          ? `<button class="copy-btn" style="background:#7a6a9e;color:#fff;border:none;padding:7px 16px;border-radius:4px;cursor:pointer;font-family:Georgia,serif;font-size:0.85rem" onclick="playAudio('${escAttr(directAudio)}', this)">▶ Play</button>`
+          : `<a href="${escHtml(forvoUrl)}" target="_blank" style="display:inline-block;padding:6px 14px;font-size:0.85rem;border:1px solid #ccc;border-radius:4px;color:#888;text-decoration:none;font-family:Georgia,serif">▶ Hear on Forvo ↗</a>`
+        }
       </div>`;
 
       html += `</div>`;
@@ -458,8 +454,17 @@
     function copyText(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 1500);
+        setTimeout(() => btn.textContent = 'Copy phonetic', 1500);
       });
+    }
+
+    function playAudio(url, btn) {
+      const audio = new Audio(url);
+      btn.textContent = '▶ Playing…';
+      btn.disabled = true;
+      audio.play();
+      audio.onended = () => { btn.textContent = '▶ Play'; btn.disabled = false; };
+      audio.onerror = () => { btn.textContent = '▶ Play'; btn.disabled = false; };
     }
 
     // ── IPA → plain-English respelling ─────────────────────────────────────
